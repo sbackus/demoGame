@@ -2,6 +2,7 @@ require "gosu"
 require "./ship"
 require "./asteroid"
 require "./lazer"
+require "./power_up"
 
 class Game < Gosu::Window
   WIDTH = 768
@@ -19,14 +20,26 @@ class Game < Gosu::Window
     @game_over = false
     @font = Gosu::Font.new(50)
     @timer = 0.0
+    @power_ups = []
+    @warps = []
   end
 
   def update
-    @timer += 0.0000011
+    @timer += 0.000017
     if !@game_over
       @space_ship.update
+      if rand < 0.0015
+        @power_ups << PowerUp.new
+      end
       if rand < 0.05 + @timer
         @asteroids << Asteroid.new
+      end
+      @power_ups.each do |pu|
+        pu.update
+        if Gosu::distance(pu.x, pu.y, @space_ship.x, @space_ship.y) < 20
+          @power_ups.delete(pu)
+          @space_ship.power_ups +=1
+        end
       end
       @asteroids.each do |asteroid|
         asteroid.update
@@ -44,7 +57,7 @@ class Game < Gosu::Window
         @lazer_sound.play
       end
       if @lazer_cooldown > 0
-        @lazer_cooldown -= 1
+        @lazer_cooldown -= 1+@space_ship.power_ups
       end
       @lazers.each do |lazer|
         lazer.update
@@ -67,8 +80,11 @@ class Game < Gosu::Window
     if @game_over
       @font.draw("Game Over", WIDTH/2-140, HEIGHT/2-50, 1)
     else
-      @font.draw((@timer*10000).round, 0, 0, 1)
+      @font.draw((@timer*1000).round, 0, 0, 1)
       @space_ship.draw
+      @power_ups.each do |pu|
+        pu.draw
+      end
       @asteroids.each do |asteroid|
         asteroid.draw
       end
@@ -80,21 +96,3 @@ class Game < Gosu::Window
 end
 
 Game.new.show
-
-class Lazer
-    attr_reader :x, :y
-    def initialize(x)
-        @image = Gosu::Image.new("images/lazer.png")
-        @x = x + 15
-        @y = Game::HEIGHT-60
-        @z = 0
-    end
-
-    def update
-        @y -= 6
-    end
-
-    def draw
-        @image.draw(@x,@y,@z)
-    end
-end
