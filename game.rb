@@ -18,12 +18,14 @@ class Game < Gosu::Window
     @explosion_sound = Gosu::Sample.new("sounds/explosion.wav")
     @game_over = false
     @font = Gosu::Font.new(50)
+    @timer = 0.0
   end
 
   def update
+    @timer += 0.0000011
     if !@game_over
       @space_ship.update
-      if rand < 0.05
+      if rand < 0.05 + @timer
         @asteroids << Asteroid.new
       end
       @asteroids.each do |asteroid|
@@ -65,6 +67,7 @@ class Game < Gosu::Window
     if @game_over
       @font.draw("Game Over", WIDTH/2-140, HEIGHT/2-50, 1)
     else
+      @font.draw((@timer*10000).round, 0, 0, 1)
       @space_ship.draw
       @asteroids.each do |asteroid|
         asteroid.draw
@@ -86,11 +89,11 @@ class Lazer
         @y = Game::HEIGHT-60
         @z = 0
     end
-    
+
     def update
         @y -= 6
     end
-    
+
     def draw
         @image.draw(@x,@y,@z)
     end
