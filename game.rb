@@ -44,8 +44,17 @@ class Game < Gosu::Window
       @asteroids.each do |asteroid|
         asteroid.update
         if Gosu::distance(@space_ship.x, @space_ship.y, asteroid.x, asteroid.y) < 30
-          @game_over = true
-          @explosion_sound.play
+          if @space_ship.power_ups >2
+            @space_ship.power_ups -=1
+          elsif @space_ship.power_ups >0
+            @game_over = false
+            @asteroids.delete(asteroid)
+            @explosion_sound.play
+            @space_ship.power_ups -=1
+          else @space_ship.power_ups <0
+            @game_over = true
+            @explosion_sound.play
+          end
         end
       end
       @asteroids.reject! do |asteroid|
