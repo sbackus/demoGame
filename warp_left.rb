@@ -1,7 +1,7 @@
 class WarpLeft
   attr_reader :x, :y
   def initialize
-    @image = Gosu::Image.new("images/asteroid.gif")
+    @image = Gosu::Image.new("images/LeftArrow.png")
     @x = rand(Game::WIDTH-@image.width)
     @y = 0
     @z = 0

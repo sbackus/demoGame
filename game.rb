@@ -3,10 +3,12 @@ require "./ship"
 require "./asteroid"
 require "./lazer"
 require "./power_up"
+require "./warp_left"
+require "./warp_right"
 
 class Game < Gosu::Window
-  WIDTH = 768
-  HEIGHT = 576
+  WIDTH = 1200
+  HEIGHT = 800
 
   def initialize
     super(WIDTH, HEIGHT, false)
@@ -28,11 +30,24 @@ class Game < Gosu::Window
     @timer += 0.000017
     if !@game_over
       @space_ship.update
+      if rand < 0.01
+        @warps << WarpLeft.new
+      end
+      if rand < 0.01
+        @warps << WarpRight.new
+      end
       if rand < 0.0015
         @power_ups << PowerUp.new
       end
       if rand < 0.05 + @timer
         @asteroids << Asteroid.new
+      end
+      @warps.each do |warp|
+        warp.update
+        if Gosu::distance(warp.x, warp.y, @space_ship.x, @space_ship.y) < 40
+          @warps.delete(warp)
+          @space_ship.warps +=1
+        end
       end
       @power_ups.each do |pu|
         pu.update
@@ -90,6 +105,7 @@ class Game < Gosu::Window
       @font.draw("Game Over", WIDTH/2-140, HEIGHT/2-50, 1)
     else
       @font.draw((@timer*1000).round, 0, 0, 1)
+      @font.draw(@space_ship.warps, WIDTH - 50, 0, 1)
       @space_ship.draw
       @power_ups.each do |pu|
         pu.draw
@@ -99,6 +115,9 @@ class Game < Gosu::Window
       end
       @lazers.each do |lazer|
         lazer.draw
+      end
+      @warps.each do |warp|
+        warp.draw
       end
     end
   end
